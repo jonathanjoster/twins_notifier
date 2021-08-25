@@ -1,0 +1,5 @@
+webdriver
+requests
+beautifulsoup4
+line-bot-sdk
+webdriver-manager
