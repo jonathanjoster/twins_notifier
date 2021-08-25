@@ -1,5 +1,6 @@
 from selenium import webdriver
 import time
+import schedule
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -7,7 +8,7 @@ from linebot import LineBotApi
 from linebot.models import TextSendMessage
 from webdriver_manager.chrome import ChromeDriverManager
     
-def main():
+def scrape():
     # visit website
     url = 'https://twins.tsukuba.ac.jp/campusweb/campusportal.do'
     browser = webdriver.Chrome(ChromeDriverManager().install())
@@ -75,5 +76,11 @@ def notify_line(message):
     messages = TextSendMessage(text=message)
     line_bot_api.push_message(USER_ID, messages=messages)
     
+def main():
+    schedule.every(3).hours.do(scrape)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+    
 if __name__ == '__main__':
-    main()
+    scrape()
