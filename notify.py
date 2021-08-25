@@ -9,64 +9,65 @@ from linebot.models import TextSendMessage
 from webdriver_manager.chrome import ChromeDriverManager
     
 def scrape():
-    # visit website
-    url = 'https://twins.tsukuba.ac.jp/campusweb/campusportal.do'
-    browser = webdriver.Chrome(ChromeDriverManager().install())
-    browser.get(url)
-    
-    # log in
-    userName_input = browser.find_element_by_name('userName')
-    userName_input.send_keys('0012018113269')
-    password_input = browser.find_element_by_name('password')
-    password_input.send_keys('Mero3650')
-    login_button = browser.find_element_by_tag_name('button')
-    login_button.click()
-    time.sleep(5)
-    
-    # 掲示一覧
-    tab_kj = browser.find_elements_by_id('tab-kj')
-    tab_kj[0].click()
-    time.sleep(5)
-
-    # 在学生へのお知らせ
-    show_mores = browser.find_elements_by_link_text('…もっと読む')
-    show_mores[2].click()
-    time.sleep(5)
-
-    # get newest 5 topics
-    res = requests.get(browser.current_url)
-    soup = BeautifulSoup(res.text, 'html.parser')
-    latest_5 = []
-    for i in range(5, 11):
-        tr = soup.find_all('tr')[i]
-        latest_5.append(re.split('\s\s\s+', tr.text.replace('\n', '').replace('\r', '').strip()))
-    
-    # new record
-    record_new = str(latest_5)
-    
-    # old record
     try:
-        with open('record.txt') as f:
-            record_old = f.read()
-    except:
-        record_old = ''
-    
-    # write file or not
-    if record_new == record_old:
-        message = 'no diff'
-    else:
-        with open('record.txt', 'w') as f:
-            f.write(record_new)
-        message = 'recorded'
+        # visit website
+        url = 'https://twins.tsukuba.ac.jp/campusweb/campusportal.do'
+        browser = webdriver.Chrome(ChromeDriverManager().install())
+        browser.get(url)
         
-    # make notification
-    to_notify = [i for i in eval(record_new) if i not in eval(record_old)]
-    if len(to_notify):
-        notify_line(message)
-    else:
-        notify_line('up to date')
+        # log in
+        userName_input = browser.find_element_by_name('userName')
+        userName_input.send_keys('0012018113269')
+        password_input = browser.find_element_by_name('password')
+        password_input.send_keys('Mero3650')
+        login_button = browser.find_element_by_tag_name('button')
+        login_button.click()
+        time.sleep(10)
         
-    browser.quit()
+        # 掲示一覧
+        tab_kj = browser.find_elements_by_id('tab-kj')
+        tab_kj[0].click()
+        time.sleep(10)
+
+        # 在学生へのお知らせ
+        show_mores = browser.find_elements_by_link_text('…もっと読む')
+        show_mores[2].click()
+        time.sleep(10)
+
+        # get newest 5 topics
+        res = requests.get(browser.current_url)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        latest_5 = []
+        for i in range(5, 11):
+            tr = soup.find_all('tr')[i]
+            latest_5.append(re.split('\s\s\s+', tr.text.replace('\n', '').replace('\r', '').strip()))
+        
+        # new record
+        record_new = str(latest_5)
+        
+        # old record
+        try:
+            with open('record.txt') as f:
+                record_old = f.read()
+        except:
+            record_old = ''
+        
+        # make notification
+        if record_new == record_old:
+            notify_line('up to date')
+        else:
+            with open('record.txt', 'w') as f:
+                f.write(record_new)
+                
+            message = 'New notice on Twins!\n'
+            to_notify = [i for i in eval(record_new) if i not in eval(record_old)]
+            for i in range(len(to_notify)):
+                message += f'{str(to_notify[i])}\n'
+            
+            notify_line(message[:-1])
+        
+    finally:    
+        browser.quit()
         
 def notify_line(message):
     ACCESS_TOKEN = '69N4y4iIcptDyKgHV1rcXAxg+Qt9cbSdy2uM/4fGOh7mOpFsCP+acGvimo6uONer4f8QNEQbqOUEt51L3JnEaQ1sHkGMUyyeKeR2znbEKTA6JUUSoUEKRGlcapO1781xy0pnNdOaOCrywTRVywK5AAdB04t89/1O/w1cDnyilFU='
