@@ -9,6 +9,9 @@ from linebot.models import TextSendMessage
 from webdriver_manager.chrome import ChromeDriverManager
     
 def scrape():
+    # for DH_KEY_TOO_SMALL Error
+    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += "HIGH:!DH"
+    
     try:
         # visit website
         url = 'https://twins.tsukuba.ac.jp/campusweb/campusportal.do'
