@@ -35,7 +35,7 @@ def scrape():
         time.sleep(10)
 
         # get newest 5 topics
-        res = requests.get(browser.current_url)
+        res = requests.get(browser.current_url, verify=False)
         soup = BeautifulSoup(res.text, 'html.parser')
         latest_5 = []
         for i in range(5, 11):
