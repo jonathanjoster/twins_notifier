@@ -7,6 +7,14 @@ import re
 from linebot import LineBotApi
 from linebot.models import TextSendMessage
 from webdriver_manager.chrome import ChromeDriverManager
+        
+def notify_line(message):
+    ACCESS_TOKEN = '69N4y4iIcptDyKgHV1rcXAxg+Qt9cbSdy2uM/4fGOh7mOpFsCP+acGvimo6uONer4f8QNEQbqOUEt51L3JnEaQ1sHkGMUyyeKeR2znbEKTA6JUUSoUEKRGlcapO1781xy0pnNdOaOCrywTRVywK5AAdB04t89/1O/w1cDnyilFU='
+    USER_ID = 'Udd54191c66c7d1acad4296a387e6dc63'
+    
+    line_bot_api = LineBotApi(ACCESS_TOKEN)
+    messages = TextSendMessage(text=message)
+    line_bot_api.push_message(USER_ID, messages=messages)
     
 def scrape():
     # for DH_KEY_TOO_SMALL Error
@@ -55,31 +63,22 @@ def scrape():
         except:
             record_old = ''
         
-        # make notification
-        if record_new == record_old:
-            notify_line('up to date')
-        else:
-            with open('record.txt', 'w') as f:
-                f.write(record_new)
-                
-            message = 'New notice on Twins!\n'
-            to_notify = [i for i in eval(record_new) if i not in eval(record_old)]
-            for i in range(len(to_notify)):
-                message += f'{str(to_notify[i])}\n'
+        # write on record.txt
+        if record_new == record_old: return
+        with open('record.txt', 'w') as f:
+            f.write(record_new)
             
-            notify_line(message[:-1])
+        # make notification
+        message = 'New notice on Twins!\n'
+        to_notify = [i for i in eval(record_new) if i not in eval(record_old)]
+        for i in range(len(to_notify)):
+            message += f'{str(to_notify[i][0])}\n'
+        message += 'Further information: https://twins.tsukuba.ac.jp/'
+        notify_line(message)
         
     finally:    
         browser.quit()
-        
-def notify_line(message):
-    ACCESS_TOKEN = '69N4y4iIcptDyKgHV1rcXAxg+Qt9cbSdy2uM/4fGOh7mOpFsCP+acGvimo6uONer4f8QNEQbqOUEt51L3JnEaQ1sHkGMUyyeKeR2znbEKTA6JUUSoUEKRGlcapO1781xy0pnNdOaOCrywTRVywK5AAdB04t89/1O/w1cDnyilFU='
-    USER_ID = 'Udd54191c66c7d1acad4296a387e6dc63'
-    
-    line_bot_api = LineBotApi(ACCESS_TOKEN)
-    messages = TextSendMessage(text=message)
-    line_bot_api.push_message(USER_ID, messages=messages)
-    
+
 def main():
     schedule.every(3).hours.do(scrape)
     while True:
