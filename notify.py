@@ -74,7 +74,9 @@ def scrape():
         for i in range(len(to_notify)):
             message += f'{str(to_notify[i][0])}\n'
         message += 'Further information: https://twins.tsukuba.ac.jp/'
-        notify_line(message)
+
+        # for removing extra line-break
+        notify_line(message[:-1])
         
     finally:    
         browser.quit()
